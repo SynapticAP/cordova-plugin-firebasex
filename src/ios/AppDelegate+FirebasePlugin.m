@@ -114,6 +114,25 @@ static bool authStateChangeListenerInitialized = false;
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     self.applicationInBackground = @(NO);
     [FirebasePlugin.firebasePlugin _logMessage:@"Enter foreground"];
+
+    if(![FIRApp defaultApp]) {
+        // get GoogleService-Info.plist file path
+        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType:@"plist"];
+        
+        // if file is successfully found, use it
+        if(filePath){
+            [FirebasePlugin.firebasePlugin _logMessage:@"GoogleService-Info.plist found, setup: [FIRApp configureWithOptions]"];
+            // create firebase configure options passing .plist as content
+            FIROptions *options = [[FIROptions alloc] initWithContentsOfFile:filePath];
+
+            // configure FIRApp with options
+            [FIRApp configureWithOptions:options];
+        }else{
+            // no .plist found, try default App
+            [FirebasePlugin.firebasePlugin _logError:@"GoogleService-Info.plist NOT FOUND, setup: [FIRApp defaultApp]"];
+            [FIRApp configure];
+        }
+    }
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
